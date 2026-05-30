@@ -1,0 +1,6 @@
+---
+- name: Configure NTP On Routers
+  hosts: routers
+  gather_facts: false
+  roles:
+    - ntp

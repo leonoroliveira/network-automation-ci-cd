@@ -1,0 +1,12 @@
+---
+- name: Simulate missing OSPF network
+  hosts: clab-aar-lab-r1
+  gather_facts: false
+
+  tasks:
+    - name: Remove host network from OSPF
+      arista.eos.eos_config:
+        lines:
+          - no network 192.168.11.0/24 area 0.0.0.1
+        parents:
+          - router ospf 1

@@ -1,0 +1,12 @@
+---
+- name: Simulate interface down
+  hosts: clab-aar-lab-r1
+  gather_facts: false
+
+  tasks:
+    - name: Disable interface Ethernet1
+      arista.eos.eos_config:
+        lines:
+          - shutdown
+        parents:
+          - interface Ethernet1

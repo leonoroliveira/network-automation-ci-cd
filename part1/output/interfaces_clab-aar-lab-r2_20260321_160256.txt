@@ -1,0 +1,6 @@
+interface,status,ip,mask
+Ethernet1,connected,172.16.12.2,24
+Ethernet2,connected,192.168.2.254,24
+Ethernet3,connected,172.16.23.2,24
+Ethernet4,connected,172.16.24.2,24
+Management0,connected,172.20.20.5,24

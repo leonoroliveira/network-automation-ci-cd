@@ -1,0 +1,70 @@
+---
+ansible_host: clab-aar-lab-r4
+ansible_port: 22
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: community.routeros.routeros
+ansible_network_cli_ssh_type: paramiko
+ansible_host_key_checking: false
+ansible_become: false
+device_type: mikrotik
+ospf_area: 4
+site_name: Braga
+
+interfaces:
+  - name: ether2
+    desc: To h4
+    ip: 192.168.4.254/24
+  - name: ether3
+    desc: To r2
+    ip: 172.16.24.4/24
+  - name: ether4
+    desc: To r1
+    ip: 172.16.14.4/24
+  - name: ether5
+    desc: To h8
+    ip: 192.168.14.254/24
+
+loopback: 172.16.0.4/32
+
+ospf:
+  router_id: 172.16.0.4
+  local_area: 4
+  networks:
+    - network: 172.16.14.0/24
+      area_name: backbone
+    - network: 172.16.24.0/24
+      area_name: backbone
+    - network: 172.16.0.4/32
+      area_name: backbone
+    - network: 192.168.4.0/24
+      area_name: backbone
+    - network: 192.168.14.0/24
+      area_name: backbone
+
+dhcp_pools:
+  - name: dhcp_pool_h4
+    range: 192.168.4.1-192.168.4.1
+    interface: ether2
+    network: 192.168.4.0/24
+    gateway: 192.168.4.254
+    dns_server: 8.8.8.8
+
+  - name: dhcp_pool_h8
+    range: 192.168.14.1-192.168.14.1
+    interface: ether5
+    network: 192.168.14.0/24
+    gateway: 192.168.14.254
+    dns_server: 8.8.8.8
+
+direct_peers:
+  - 172.16.14.1
+  - 172.16.24.2
+
+remote_peers:
+  - 172.16.0.1
+  - 172.16.0.2
+  - 172.16.0.3
+
+expected_routes:
+  - 192.168.4.0/24
+  - 192.168.14.0/24

@@ -1,0 +1,12 @@
+---
+- name: Restore interface
+  hosts: clab-aar-lab-r1
+  gather_facts: false
+
+  tasks:
+    - name: Enable interface Ethernet1
+      arista.eos.eos_config:
+        lines:
+          - no shutdown
+        parents:
+          - interface Ethernet1

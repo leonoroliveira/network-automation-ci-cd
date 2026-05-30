@@ -1,0 +1,72 @@
+---
+- name: Get SR Linux interfaces
+  ansible.builtin.command:
+    cmd: >
+      gnmic -a {{ inventory_hostname }}:57400
+      -u {{ ansible_user }} -p {{ ansible_password }}
+      --skip-verify -e json_ietf
+      get --path /interface/subinterface/ipv4/address
+  register: srl_interfaces
+  changed_when: false
+
+- name: Validate interface IPs exist
+  assert:
+    that:
+      - item.subinterface.ip_prefix in srl_interfaces.stdout
+    fail_msg: "Missing or incorrect IP for {{ item.name }}"
+    success_msg: "{{ item.name }} IP validated"
+  loop: "{{ interfaces }}"
+
+- name: Ping directly connected peers
+  ansible.builtin.command:
+    cmd: >
+      docker exec {{ inventory_hostname }}
+      bash -lc 'sr_cli "ping {{ item }} network-instance default -c 2"'
+  loop: "{{ direct_peers | default([]) }}"
+  delegate_to: localhost
+  changed_when: false
+
+- name: Check remote reachability routes
+  command: >
+    gnmic -a {{ inventory_hostname }}:57400
+    -u admin -p admin
+    --skip-verify
+    -e json_ietf
+    get --path /network-instance[name=default]/route-table
+  register: route_table
+  changed_when: false
+
+
+- name: Validate expected routes
+  assert:
+    that:
+      - item in route_table.stdout
+    fail_msg: "Route {{ item }} missing"
+    success_msg: "Route {{ item }} present"
+  loop: "{{ expected_routes | default([]) }}"
+
+
+- name: Check OSPF neighbors
+  command: >
+    gnmic -a {{ inventory_hostname }}:57400
+    -u admin -p admin
+    --skip-verify
+    -e json_ietf
+    get --path /network-instance[name=default]/protocols/ospf
+  register: ospf_state
+  changed_when: false
+
+- name: Validate OSPF enabled
+  assert:
+    that:
+      - "'ospf-v2' in ospf_state.stdout"
+      - "'enable' in ospf_state.stdout"
+
+
+- name: Validate OSPF areas
+  ansible.builtin.assert:
+    that:
+      - item.interface_name in ospf_state.stdout
+    fail_msg: "OSPF interface {{ item.interface_name }} missing"
+    success_msg: "OSPF interface {{ item.interface_name }} found"
+  loop: "{{ ospf.interfaces }}"

@@ -1,0 +1,71 @@
+! Command: show running-config
+! device: r2 (cEOSLab, EOS-4.35.2F-46221466.4352F (engineering build))
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret sha512 $6$cdVBwbZnGKRNa7ca$Vj9Qqp6b2P2wo6E1Cx7osDT8kYPpWCEyZb3XgR9pvQn/V.7/iG3LUJ/5mqCrmj9ya1r/B6oHCKlKjiPO6et7Z1
+!
+management api http-commands
+   no shutdown
+!
+no service interface inactive port-id allocation disabled
+!
+service routing protocols model multi-agent
+!
+hostname r2
+!
+spanning-tree mode mstp
+!
+system l1
+   unsupported speed action error
+   unsupported error-correction action error
+!
+management api gnmi
+   transport grpc default
+!
+management api netconf
+   transport ssh default
+!
+interface Ethernet1
+   description to r1
+   no switchport
+   ip address 172.16.12.2/24
+!
+interface Ethernet2
+   description to h2
+   no switchport
+   ip address 192.168.2.254/24
+!
+interface Ethernet3
+   description to r3
+   no switchport
+   ip address 172.16.23.2/24
+!
+interface Ethernet4
+   description to r4
+   no switchport
+   ip address 172.16.24.2/24
+!
+interface Loopback0
+   ip address 172.16.0.2/32
+!
+interface Management0
+   ip address 172.20.20.5/24
+   ipv6 address 3fff:172:20:20::5/64
+!
+ip routing
+!
+ip route 0.0.0.0/0 172.20.20.1
+!
+ipv6 route ::/0 3fff:172:20:20::1
+!
+router ospf 1
+   router-id 172.16.0.2
+   network 172.16.0.2/32 area 0.0.0.2
+   network 172.16.12.0/24 area 0.0.0.0
+   network 172.16.23.0/24 area 0.0.0.0
+   network 172.16.24.0/24 area 0.0.0.0
+   network 192.168.2.0/24 area 0.0.0.2
+   max-lsa 12000
+!
+end

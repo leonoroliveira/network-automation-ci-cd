@@ -1,0 +1,5 @@
+interface,status,ip,mask
+ether1,up,172.31.255.30,30
+ether2,up,,
+ether3,up,,
+ether4,up,,

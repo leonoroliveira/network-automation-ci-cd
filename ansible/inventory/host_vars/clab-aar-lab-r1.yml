@@ -1,0 +1,78 @@
+---
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: arista.eos.eos
+device_type: arista
+ospf_area: 1
+site_name: Lisboa
+
+hostname: r1
+loopback: 172.16.0.1/32
+
+interfaces:
+  - name: Ethernet1
+    desc: To r2
+    ip: 172.16.12.1/24
+    ospf_p2p: true
+  - name: Ethernet2
+    desc: To h1
+    ip: 192.168.1.254/24
+    ospf_p2p: false
+  - name: Ethernet3
+    desc: To r3
+    ip: 172.16.13.1/24
+    ospf_p2p: true
+  - name: Ethernet4
+    desc: To r4
+    ip: 172.16.14.1/24
+    ospf_p2p: true
+  - name: Ethernet5
+    desc: To h5
+    ip: 192.168.11.254/24
+    ospf_p2p: false
+
+ospf:
+  processId: 1
+  routerId: 172.16.0.1
+  networks:
+    - network: 172.16.0.1
+      wildcard: 0.0.0.0
+      area: 0
+    - network: 172.16.12.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 172.16.13.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 172.16.14.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 192.168.1.0
+      wildcard: 0.0.0.255
+      area: 1
+    - network: 192.168.11.0
+      wildcard: 0.0.0.255
+      area: 1
+
+dhcp:
+  pool_name: LAN_H1
+  network: 192.168.1.0/24
+  default_router: 192.168.1.254
+  dns_server: 8.8.8.8
+
+direct_peers:
+  - 172.16.12.2
+  - 172.16.13.3
+  - 172.16.14.4
+
+remote_peers:
+  - 172.16.0.2
+  - 172.16.0.4
+
+expected_routes:
+  - 192.168.2.0/24
+  - 192.168.12.0/24
+
+expected_ospf_neighbors:
+  - 172.16.0.2
+  - 172.16.0.3
+  - 172.16.0.4

@@ -1,0 +1,7 @@
+---
+- name: Network Health Checks
+  hosts: routers
+  gather_facts: false
+
+  roles:
+    - maintenance

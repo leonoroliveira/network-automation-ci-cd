@@ -1,0 +1,46 @@
+---
+all:
+  children:
+    routers:
+      children:
+        sul:
+          children:
+            lisboa:
+              hosts:
+                clab-aar-lab-twin-r1:
+            faro:
+              hosts:
+                clab-aar-lab-twin-r3:
+
+        norte:
+          children:
+            porto:
+              hosts:
+                clab-aar-lab-twin-r2:
+            braga:
+              hosts:
+                clab-aar-lab-twin-r4:
+
+    hosts:
+      children:
+        sul_hosts:
+          hosts:
+            clab-aar-lab-h1:
+              gateway_ip: 192.168.1.254
+            clab-aar-lab-h3:
+              gateway_ip: 192.168.3.254
+            clab-aar-lab-h5:
+              gateway_ip: 192.168.11.254
+            clab-aar-lab-h7:
+              gateway_ip: 192.168.13.254
+
+        norte_hosts:
+          hosts:
+            clab-aar-lab-h2:
+              gateway_ip: 192.168.2.254
+            clab-aar-lab-h4:
+              gateway_ip: 192.168.4.254
+            clab-aar-lab-h6:
+              gateway_ip: 192.168.12.254
+            clab-aar-lab-h8:
+              gateway_ip: 192.168.14.254

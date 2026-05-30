@@ -1,0 +1,44 @@
+{
+    "name": "AAR Lab Environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "26.1.5",
+            "dockerDashComposeVersion": "v2",
+            "installDockerComposeSwitch": "false"
+        },
+        "ghcr.io/devcontainers/features/sshd:1": {
+            "version": "latest"
+        }
+    },
+    "hostRequirements": {
+        "cpus": 4,
+        "memory": "16gb",
+        "storage": "32gb"
+    },
+    "remoteUser": "vscode",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+								"terminal.integrated.fontFamily": "FiraCode Nerd Font, Menlo, Monaco, Cascadia Code, Consolas, Courier New, monospace"
+            },
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "ms-python.python",
+								"mechatroner.rainbow-csv",
+                "redhat.vscode-yaml",
+                "redhat.ansible",
+								"yzhang.markdown-all-in-one",
+								"davidanson.vscode-markdownlint",
+                "srl-labs.vscode-containerlab"
+            ]
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/clab,type=bind,consistency=cached",
+    "workspaceFolder": "/clab"
+}

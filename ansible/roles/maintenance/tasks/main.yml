@@ -1,0 +1,12 @@
+---
+- name: Include Arista Checks
+  ansible.builtin.include_tasks: arista_check.yml
+  when: device_type == "arista"
+
+- name: Include SR Linux Checks
+  ansible.builtin.include_tasks: srlinux_check.yml
+  when: device_type == "srlinux"
+
+- name: Include Mikrotik Checks
+  ansible.builtin.include_tasks: mikrotik_check.yml
+  when: device_type == "mikrotik"

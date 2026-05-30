@@ -1,0 +1,22 @@
+---
+- name: Validate Network State
+  hosts: routers
+  gather_facts: false
+
+  roles:
+    - maintenance
+
+
+- name: Validate Host Connectivity
+  hosts: hosts
+  gather_facts: false
+  connection: local
+
+  tasks:
+
+    - name: Ping default gateway from host container
+      ansible.builtin.command:
+        cmd: >
+          docker exec {{ inventory_hostname }}
+          ping -c 3 {{ gateway_ip }}
+      changed_when: false

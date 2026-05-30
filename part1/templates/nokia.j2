@@ -1,0 +1,83 @@
+{
+  "srl_nokia-interfaces:interface": [
+    {
+      "name": "{{ loopback.name }}",
+      "admin-state": "{{ loopback.admin_state }}",
+      "subinterface": [
+        {
+          "index": {{ loopback.subinterface.index }},
+          "admin-state": "{{ loopback.subinterface.admin_state }}",
+          "ipv4": {
+            "admin-state": "{{ loopback.subinterface.ipv4_admin_state }}",
+            "address": [
+              {
+                "ip-prefix": "{{ loopback.subinterface.ip_prefix }}"
+              }
+            ]
+          }
+        }
+      ]
+    }{% if interfaces|length > 0 %},{% endif %}
+    {% for myInterface in interfaces %}
+    {
+      "name": "{{ myInterface.name }}",
+      "admin-state": "{{ myInterface.admin_state }}",
+      "subinterface": [
+        {
+          "index": {{ myInterface.subinterface.index }},
+          "type": "{{ myInterface.subinterface.type }}",
+          "admin-state": "{{ myInterface.subinterface.admin_state }}",
+          "ipv4": {
+            "admin-state": "{{ myInterface.subinterface.ipv4_admin_state }}",
+            "address": [
+              {
+                "ip-prefix": "{{ myInterface.subinterface.ip_prefix }}"
+              }
+            ]
+          }
+        }
+      ]
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "srl_nokia-network-instance:network-instance": [
+    {
+      "name": "{{ network_instance.name }}",
+      "interface": [
+        {% for myInterfaceName in network_instance.interfaces %}
+        {
+          "name": "{{ myInterfaceName }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "protocols": {
+        "srl_nokia-ospf:ospf": {
+          "instance": [
+            {
+              "name": "{{ ospf.name }}",
+              "admin-state": "{{ ospf.admin_state }}",
+              "router-id": "{{ ospf.router_id }}",
+              "version": "{{ ospf.version }}",
+              "area": [
+                {
+                  "area-id": "{{ ospf.area_id }}",
+                  "interface": [
+                    {% for myOspfInterface in ospf.interfaces %}
+                    {
+                      "interface-name": "{{ myOspfInterface.interface_name }}",
+                      "admin-state": "{{ myOspfInterface.admin_state }}"{% if myOspfInterface.interface_type is defined %},
+                      "interface-type": "{{ myOspfInterface.interface_type }}"{% endif %},
+                      "advertise-subnet": {{ "true" if myOspfInterface.advertise_subnet else "false" }}{% if myOspfInterface.passive is defined %},
+                      "passive": {{ "true" if myOspfInterface.passive else "false" }}{% endif %}
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

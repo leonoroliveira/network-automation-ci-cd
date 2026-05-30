@@ -1,0 +1,6 @@
+---
+- name: Configure OSPF On Routers
+  hosts: routers
+  gather_facts: false
+  roles:
+    - ospf

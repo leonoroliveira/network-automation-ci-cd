@@ -1,0 +1,6 @@
+---
+- name: Configure DHCP
+  hosts: routers
+  gather_facts: false
+  roles:
+    - dhcp

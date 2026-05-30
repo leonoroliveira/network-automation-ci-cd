@@ -1,0 +1,27 @@
+hostname {{ hostname }}
+
+ip routing
+
+!
+interface Loopback0
+   ip address {{ loopback }}
+
+!
+{% for iface in interfaces %}
+interface {{ iface.name }}
+   description {{ iface.desc }}
+   no switchport
+   no shutdown
+   ip address {{ iface.ip }}
+{% if iface.ospf_p2p %}
+   ip ospf network point-to-point
+{% endif %}
+
+!
+{% endfor %}
+
+router ospf {{ ospf.processId }}
+   router-id {{ ospf.routerId }}
+{% for net in ospf.networks %}
+   network {{ net.network }} {{ net.wildcard }} area {{ net.area }}
+{% endfor %}

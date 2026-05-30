@@ -1,0 +1,5 @@
+{% for pool in dhcp_pools %}
+/ip pool add name={{ pool.name }} ranges={{ pool.range }}
+/ip dhcp-server add name=dhcp_{{ pool.name }} interface={{ pool.interface }} address-pool={{ pool.name }} disabled=no
+/ip dhcp-server network add address={{ pool.network }} gateway={{ pool.gateway }} dns-server={{ pool.dns_server }}
+{% endfor %}

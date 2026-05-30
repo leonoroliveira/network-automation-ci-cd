@@ -1,0 +1,85 @@
+---
+- name: Check Arista Interfaces And IP Addresses
+  arista.eos.eos_command:
+    commands:
+      - show ip interface brief
+  register: arista_interfaces
+  when: device_type == "arista"
+
+- name: Assert Arista Interfaces Have Expected IPs
+  ansible.builtin.assert:
+    that:
+      - item.ip.split('/')[0] in arista_interfaces.stdout[0]
+    fail_msg: "Interface {{ item.name }} does not have expected IP {{ item.ip }}"
+    success_msg: "Interface {{ item.name }} has expected IP {{ item.ip }}"
+  loop: "{{ interfaces }}"
+  when: device_type == "arista"
+
+
+- name: Ping Directly Connected Peers On Arista
+  arista.eos.eos_command:
+    commands:
+      - "ping {{ item }} repeat 2"
+  register: arista_direct_ping
+  loop: "{{ direct_peers | default([]) }}"
+  when: device_type == "arista"
+
+
+- name: Ping Remote Devices On Arista
+  arista.eos.eos_command:
+    commands:
+      - "ping {{ item }} repeat 2"
+  register: arista_remote_ping
+  loop: "{{ remote_peers | default([]) }}"
+  when: device_type == "arista"
+
+- name: Check Arista Routing Table
+  arista.eos.eos_command:
+    commands:
+      - show ip route
+  register: arista_routes
+  when: device_type == "arista"
+
+- name: Assert Arista Expected Routes Exist
+  ansible.builtin.assert:
+    that:
+      - item in arista_routes.stdout[0]
+    fail_msg: "Expected route {{ item }} not found"
+    success_msg: "Expected route {{ item }} found"
+  loop: "{{ expected_routes | default([]) }}"
+  when: device_type == "arista"
+
+
+- name: Check Arista OSPF Neighbors
+  arista.eos.eos_command:
+    commands:
+      - show ip ospf neighbor
+  register: arista_ospf_neighbors
+  when: device_type == "arista"
+
+- name: Assert Arista OSPF Neighbors Exist
+  ansible.builtin.assert:
+    that:
+      - item in arista_ospf_neighbors.stdout[0]
+    fail_msg: "Expected OSPF neighbor {{ item }} not detected"
+    success_msg: "Expected OSPF neighbor {{ item }} detected"
+  loop: "{{ expected_ospf_neighbors | default([]) }}"
+  when: device_type == "arista"
+
+
+- name: Check Arista OSPF Configuration
+  arista.eos.eos_command:
+    commands:
+      - show running-config section ospf
+  register: arista_ospf_config
+  when: device_type == "arista"
+
+- name: Assert Arista OSPF Networks Are In Correct Areas
+  assert:
+    that:
+      - item.network in arista_ospf_config.stdout[0]
+      - >
+        ("area 0.0.0." ~ item.area|string) in arista_ospf_config.stdout[0]
+        or
+        ("area " ~ item.area|string) in arista_ospf_config.stdout[0]
+  loop: "{{ ospf.networks }}"

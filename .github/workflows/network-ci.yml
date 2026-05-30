@@ -1,0 +1,96 @@
+name: Network CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  VENV_PATH: /home/xlcvlym/.venv
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linting Tools
+        run: |
+          source $VENV_PATH/bin/activate
+          pip install yamllint ansible-lint
+
+      - name: Validate YAML Files
+        run: |
+          source $VENV_PATH/bin/activate
+          yamllint -d relaxed ansible/ topology/aar-lab.yml topology/aar-lab-twin.yml telemetry/ .github/workflows/
+
+      - name: Validate Jinja Templates
+        run: |
+          source $VENV_PATH/bin/activate
+          python tests/validate_jinja.py
+
+      - name: Validate Ansible Playbooks
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-lint playbooks/
+
+  staging:
+    runs-on: self-hosted
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Digital Twin
+        run: sudo containerlab deploy -t topology/aar-lab-twin.yml --reconfigure
+
+      - name: Wait For Devices To Boot
+        run: ./scripts/wait_for_devices.sh twin
+
+      - name: Configure Twin Network
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/configure_ospf.yml
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/configure_ntp.yml
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/configure_dhcp.yml
+
+      - name: Wait For OSPF Convergence
+        run: sleep 60
+
+      - name: Run Validation Tests
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/validate.yml
+
+      - name: Destroy Digital Twin
+        if: always()
+        run: sudo containerlab destroy -t topology/aar-lab-twin.yml --cleanup
+
+  deploy-to-production:
+    runs-on: self-hosted
+    needs: staging
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Production Network
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_ospf.yml
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_ntp.yml
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_dhcp.yml
+
+      - name: Wait For OSPF Convergence
+        run: sleep 60
+
+      - name: Validate Production
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/validate.yml

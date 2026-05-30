@@ -1,0 +1,42 @@
+{
+  "system": {
+    "dhcp-server": {
+      "admin-state": "enable",
+      "network-instance": [
+        {
+          "name": "default",
+          "dhcpv4": {
+            "admin-state": "enable",
+            "static-allocation": {
+              "host": [
+{% for item in dhcp %}
+                {
+                  "mac": "{{ item.mac_address }}",
+                  "ip-address": "{{ item.ip_address }}"
+                }{% if not loop.last %},{% endif %}
+{% endfor %}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "interface": [
+{% for item in dhcp %}
+    {
+      "name": "{{ item.interface }}",
+      "subinterface": [
+        {
+          "index": 0,
+          "ipv4": {
+            "dhcp-server": {
+              "admin-state": "enable"
+            }
+          }
+        }
+      ]
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]
+}

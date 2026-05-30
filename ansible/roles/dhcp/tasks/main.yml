@@ -1,0 +1,38 @@
+---
+- name: Generate DHCP Configuration
+  ansible.builtin.template:
+    src: "{{ device_type }}_dhcp.j2"
+    dest: "/tmp/{{ inventory_hostname }}_dhcp.cfg"
+    mode: "0644"
+  delegate_to: localhost
+
+- name: Deploy DHCP Configuration On Arista
+  ansible.builtin.debug:
+    msg: "DHCP server not supported on this Arista cEOS image; documented as limitation."
+  when: device_type == "arista"
+
+- name: Deploy DHCP Configuration On SR Linux
+  ansible.builtin.command:
+    cmd: >
+      gnmic set
+      -a {{ inventory_hostname }}:57400
+      -u {{ ansible_user }}
+      -p {{ ansible_password }}
+      --skip-verify
+      -e json_ietf
+      --update-path /
+      --update-file /tmp/{{ inventory_hostname }}_dhcp.cfg
+  when: device_type == "srlinux"
+
+- name: Establish Mikrotik Session
+  ansible.netcommon.cli_command:
+    command: "/system identity print"
+  when: device_type == "mikrotik"
+
+- name: Deploy DHCP Configuration On Mikrotik
+  ansible.netcommon.cli_command:
+    command: "{{ item }}"
+  loop: "{{ lookup('file', '/tmp/' ~ inventory_hostname ~ '_dhcp.cfg').splitlines() }}"
+  when:
+    - device_type == "mikrotik"
+    - item | trim != ""

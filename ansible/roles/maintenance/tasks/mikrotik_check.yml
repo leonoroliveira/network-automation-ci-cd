@@ -1,0 +1,87 @@
+---
+- name: Verify Mikrotik reachable
+  ansible.netcommon.cli_command:
+    command: /system identity print
+
+
+- name: Check interfaces
+  ansible.netcommon.cli_command:
+    command: /interface print
+  register: mikrotik_interfaces
+
+- name: Assert interfaces are running
+  ansible.builtin.assert:
+    that:
+      - item.name in mikrotik_interfaces.stdout
+    fail_msg: "Interface {{ item.name }} missing"
+    success_msg: "Interface {{ item.name }} present"
+  loop: "{{ interfaces }}"
+
+
+- name: Check interface addresses
+  ansible.netcommon.cli_command:
+    command: /ip address print
+  register: mikrotik_ip
+
+- name: Validate interface IP addresses
+  ansible.builtin.assert:
+    that:
+      - item.ip in mikrotik_ip.stdout
+    fail_msg: "IP {{ item.ip }} missing"
+    success_msg: "IP {{ item.ip }} found"
+  loop: "{{ interfaces }}"
+
+
+- name: Ping directly connected peers
+  ansible.netcommon.cli_command:
+    command: "/ping {{ item }} count=2"
+  loop: "{{ direct_peers | default([]) }}"
+  register: peer_ping
+
+
+- name: Ping remote devices
+  ansible.netcommon.cli_command:
+    command: "/ping {{ item }} count=2"
+  loop: "{{ remote_peers | default([]) }}"
+  register: remote_ping
+
+
+- name: Check routes
+  ansible.netcommon.cli_command:
+    command: /ip route print detail
+  register: mikrotik_routes
+
+- name: Assert expected routes exist
+  ansible.builtin.assert:
+    that:
+      - item in mikrotik_routes.stdout
+    fail_msg: "Route {{ item }} missing"
+    success_msg: "Route {{ item }} present"
+  loop: "{{ expected_routes | default([]) }}"
+
+
+- name: Check OSPF neighbors
+  ansible.netcommon.cli_command:
+    command: /routing ospf neighbor print
+  register: ospf_neighbors
+
+- name: Assert OSPF neighbors are Full
+  ansible.builtin.assert:
+    that:
+      - "'Full' in ospf_neighbors.stdout"
+    fail_msg: "OSPF adjacency problem"
+    success_msg: "OSPF neighbors healthy"
+
+
+- name: Check OSPF networks
+  ansible.netcommon.cli_command:
+    command: /routing ospf network print
+  register: ospf_networks
+
+- name: Validate OSPF networks
+  ansible.builtin.assert:
+    that:
+      - item.network in ospf_networks.stdout
+    fail_msg: "OSPF network {{ item.network }} missing"
+    success_msg: "OSPF network {{ item.network }} found"
+  loop: "{{ ospf.networks }}"
