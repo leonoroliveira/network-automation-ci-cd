@@ -1,4 +1,9 @@
 ---
-- import_playbook: configure_ospf.yml
-- import_playbook: configure_ntp.yml
-- import_playbook: configure_dhcp.yml
+- name: Configure OSPF
+  import_playbook: configure_ospf.yml
+
+- name: Configure NTP
+  import_playbook: configure_ntp.yml
+
+- name: Configure DHCP
+  import_playbook: configure_dhcp.yml

@@ -22,6 +22,7 @@
       -e json_ietf
       --update-path /
       --update-file /tmp/{{ inventory_hostname }}_dhcp.cfg
+  changed_when: false
   when: device_type == "srlinux"
 
 - name: Establish Mikrotik Session
