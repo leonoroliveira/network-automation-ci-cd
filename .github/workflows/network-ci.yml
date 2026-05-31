@@ -60,6 +60,12 @@ jobs:
 
       - name: Wait For OSPF Convergence
         run: sleep 60
+      
+      - name: Fix Twin Host Routes
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/fix_host_routes.yml
 
       - name: Run Validation Tests
         run: |
@@ -88,6 +94,12 @@ jobs:
 
       - name: Wait For OSPF Convergence
         run: sleep 60
+
+      - name: Fix Production Host Routes
+        run: |
+          source $VENV_PATH/bin/activate
+          cd ansible
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/fix_host_routes.yml
 
       - name: Validate Production
         run: |

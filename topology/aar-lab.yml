@@ -22,34 +22,54 @@ topology:
         system aaa authentication admin-user password admin
     r4:
       kind: mikrotik_ros
+
     h1:
       kind: linux
       exec:
-        - udhcpc -i eth1 -b
+        - ip addr add 192.168.1.1/24 dev eth1
+        - sh -c "ip route del default || true"
+        - sh -c "ip route add default via 192.168.1.254 dev eth1 || true"
+
     h2:
       kind: linux
       exec:
-        - udhcpc -i eth1 -b
+        - ip addr add 192.168.2.1/24 dev eth1
+        - sh -c "ip route del default || true"
+        - sh -c "ip route add default via 192.168.2.254 dev eth1 || true"
+
     h3:
       kind: linux
       exec:
+        - ip link set dev eth1 address aa:c1:ab:c2:05:b9
         - udhcpc -i eth1 -b
+        - sh -c "sleep 5; ip route del default 2>/dev/null || true; ip route add default via 192.168.3.254 dev eth1"
+
     h4:
       kind: linux
       exec:
         - udhcpc -i eth1 -b
+
     h5:
       kind: linux
       exec:
-        - udhcpc -i eth1 -b
+        - ip addr add 192.168.11.1/24 dev eth1
+        - sh -c "ip route del default || true"
+        - sh -c "ip route add default via 192.168.11.254 dev eth1 || true"
+
     h6:
       kind: linux
       exec:
-        - udhcpc -i eth1 -b
+        - ip addr add 192.168.12.1/24 dev eth1
+        - sh -c "ip route del default || true"
+        - sh -c "ip route add default via 192.168.12.254 dev eth1 || true"
+
     h7:
       kind: linux
       exec:
+        - ip link set dev eth1 address aa:c1:ab:ca:c8:5d
         - udhcpc -i eth1 -b
+        - sh -c "sleep 5; ip route del default 2>/dev/null || true; ip route add default via 192.168.13.254 dev eth1"
+    
     h8:
       kind: linux
       exec:

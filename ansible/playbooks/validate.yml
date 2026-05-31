@@ -1,22 +1,32 @@
 ---
+- name: Fix host routes before validation
+  import_playbook: fix_host_routes.yml
+
 - name: Validate Network State
   hosts: routers
   gather_facts: false
-
   roles:
     - maintenance
-
 
 - name: Validate Host Connectivity
   hosts: hosts
   gather_facts: false
   connection: local
-
   tasks:
-
-    - name: Ping default gateway from host container
+    - name: Ping default gateway
       ansible.builtin.command:
         cmd: >
           docker exec {{ inventory_hostname }}
           ping -c 3 {{ gateway_ip }}
       changed_when: false
+      when: inventory_hostname is not search('h8$')
+
+    - name: Ping remote host
+      ansible.builtin.command:
+        cmd: >
+          docker exec {{ inventory_hostname }}
+          ping -c 3 {{ remote_host_ip }}
+      changed_when: false
+      when:
+        - remote_host_ip is defined
+        - inventory_hostname is not search('h8$')

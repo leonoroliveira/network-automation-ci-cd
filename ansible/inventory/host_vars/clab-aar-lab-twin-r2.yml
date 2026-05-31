@@ -1,0 +1,78 @@
+---
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: arista.eos.eos
+device_type: arista
+ospf_area: 2
+site_name: Porto
+
+hostname: r2
+loopback: 172.16.0.2/32
+
+interfaces:
+  - name: Ethernet1
+    desc: To r1
+    ip: 172.16.12.2/24
+    ospf_p2p: true
+  - name: Ethernet2
+    desc: To h2
+    ip: 192.168.2.254/24
+    ospf_p2p: false
+  - name: Ethernet3
+    desc: To r3
+    ip: 172.16.23.2/24
+    ospf_p2p: true
+  - name: Ethernet4
+    desc: To r4
+    ip: 172.16.24.2/24
+    ospf_p2p: true
+  - name: Ethernet5
+    desc: To h6
+    ip: 192.168.12.254/24
+    ospf_p2p: false
+
+ospf:
+  processId: 1
+  routerId: 172.16.0.2
+  networks:
+    - network: 172.16.0.2
+      wildcard: 0.0.0.0
+      area: 0
+    - network: 172.16.12.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 172.16.23.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 172.16.24.0
+      wildcard: 0.0.0.255
+      area: 0
+    - network: 192.168.2.0
+      wildcard: 0.0.0.255
+      area: 2
+    - network: 192.168.12.0
+      wildcard: 0.0.0.255
+      area: 2
+
+dhcp:
+  pool_name: LAN_H2
+  network: 192.168.2.0/24
+  default_router: 192.168.2.254
+  dns_server: 8.8.8.8
+
+direct_peers:
+  - 172.16.12.1
+  - 172.16.23.3
+  - 172.16.24.4
+
+remote_peers:
+  - 172.16.0.1
+  - 172.16.0.4
+
+expected_routes:
+  - 192.168.1.0/24
+  - 192.168.11.0/24
+
+expected_ospf_neighbors:
+  - 172.16.0.1
+  - 172.16.0.3
+  - 172.16.0.4

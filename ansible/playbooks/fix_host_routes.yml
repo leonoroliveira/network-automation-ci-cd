@@ -1,0 +1,10 @@
+---
+- name: Fix Linux host default routes
+  hosts: hosts:!clab-aar-lab-h8:!clab-aar-lab-twin-h8
+  gather_facts: false
+  tasks:
+    - name: Replace default route via lab gateway
+      ansible.builtin.command: >
+        docker exec {{ inventory_hostname }}
+        sh -c "ip route replace default via {{ gateway_ip }} dev eth1"
+      delegate_to: localhost

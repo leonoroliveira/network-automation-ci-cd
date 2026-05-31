@@ -25,22 +25,22 @@ all:
       children:
         sul_hosts:
           hosts:
-            clab-aar-lab-h1:
+            clab-aar-lab-twin-h1:
               gateway_ip: 192.168.1.254
-            clab-aar-lab-h3:
+            clab-aar-lab-twin-h3:
               gateway_ip: 192.168.3.254
-            clab-aar-lab-h5:
+            clab-aar-lab-twin-h5:
               gateway_ip: 192.168.11.254
-            clab-aar-lab-h7:
+            clab-aar-lab-twin-h7:
               gateway_ip: 192.168.13.254
 
         norte_hosts:
           hosts:
-            clab-aar-lab-h2:
+            clab-aar-lab-twin-h2:
               gateway_ip: 192.168.2.254
-            clab-aar-lab-h4:
+            clab-aar-lab-twin-h4:
               gateway_ip: 192.168.4.254
-            clab-aar-lab-h6:
+            clab-aar-lab-twin-h6:
               gateway_ip: 192.168.12.254
-            clab-aar-lab-h8:
+            clab-aar-lab-twin-h8:
               gateway_ip: 192.168.14.254
