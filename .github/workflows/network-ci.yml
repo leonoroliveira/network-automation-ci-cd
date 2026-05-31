@@ -60,7 +60,7 @@ jobs:
 
       - name: Wait For OSPF Convergence
         run: sleep 60
-      
+
       - name: Fix Twin Host Routes
         run: |
           source $VENV_PATH/bin/activate
