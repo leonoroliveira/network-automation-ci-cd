@@ -2,10 +2,16 @@
 
 ENV=$1
 
+if [ "$ENV" = "twin" ]; then
+    PREFIX="clab-aar-lab-twin"
+else
+    PREFIX="clab-aar-lab"
+fi
+
 echo "Waiting 60s for devices to initialise ..."
 sleep 60
 
-for device in clab-aar-lab-r1 clab-aar-lab-r2 clab-aar-lab-r3 clab-aar-lab-r4; do
+for device in "$PREFIX-r1" "$PREFIX-r2" "$PREFIX-r3" "$PREFIX-r4"; do
     echo "Waiting for $device SSH ..."
 
     until nc -z "$device" 22 2>/dev/null; do
