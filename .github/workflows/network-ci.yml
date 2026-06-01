@@ -58,8 +58,8 @@ jobs:
           ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/configure_ntp.yml
           ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/twin.yml playbooks/configure_dhcp.yml
 
-      - name: Wait For OSPF Convergence
-        run: sleep 60
+      - name: Wait For Network And DHCP Convergence
+        run: sleep 120
 
       - name: Fix Twin Host Routes
         run: |
@@ -92,8 +92,8 @@ jobs:
           ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_ntp.yml
           ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_dhcp.yml
 
-      - name: Wait For OSPF Convergence
-        run: sleep 60
+      - name: Wait For Network And DHCP Convergence
+        run: sleep 120
 
       - name: Fix Production Host Routes
         run: |
