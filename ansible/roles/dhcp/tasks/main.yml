@@ -7,8 +7,8 @@
   delegate_to: localhost
 
 - name: Deploy DHCP Configuration On Arista
-  ansible.builtin.debug:
-    msg: "DHCP server not supported on this Arista cEOS image; documented as limitation."
+  arista.eos.eos_config:
+    src: arista_dhcp.j2
   when: device_type == "arista"
 
 - name: Deploy DHCP Configuration On SR Linux
