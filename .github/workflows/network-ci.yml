@@ -88,9 +88,7 @@ jobs:
         run: |
           source $VENV_PATH/bin/activate
           cd ansible
-          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_ospf.yml
-          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_ntp.yml
-          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure_dhcp.yml
+          ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory/production.yml playbooks/configure.yml
 
       - name: Wait For Network And DHCP Convergence
         run: sleep 120
