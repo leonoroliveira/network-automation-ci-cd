@@ -1,4 +1,10 @@
-ip dhcp pool {{ dhcp.pool_name }}
-   network {{ dhcp.network }}
-   default-router {{ dhcp.default_router }}
-   dns-server {{ dhcp.dns_server }}
+dhcp server
+{% for pool in dhcp %}
+   subnet {{ pool.network }}
+      default-gateway {{ pool.default_router }}
+      range {{ pool.start_ip }} {{ pool.end_ip }}
+{% endfor %}
+{% for pool in dhcp %}
+interface {{ pool.interface }}
+   dhcp server ipv4
+{% endfor %}

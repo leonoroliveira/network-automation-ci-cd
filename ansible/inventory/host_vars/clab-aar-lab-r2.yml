@@ -54,10 +54,18 @@ ospf:
       area: 2
 
 dhcp:
-  pool_name: LAN_H2
-  network: 192.168.2.0/24
-  default_router: 192.168.2.254
-  dns_server: 8.8.8.8
+  - pool_name: LAN_H2
+    interface: eth2
+    network: 192.168.2.0/24
+    default_router: 192.168.2.254
+    start_ip: 192.168.2.100
+    end_ip: 192.168.2.200
+  - pool_name: LAN_H6
+    interface: eth5
+    network: 192.168.12.0/24
+    default_router: 192.168.12.254
+    start_ip: 192.168.12.100
+    end_ip: 192.168.12.200
 
 direct_peers:
   - 172.16.12.1
