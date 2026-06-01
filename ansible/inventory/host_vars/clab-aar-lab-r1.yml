@@ -3,7 +3,7 @@ ansible_connection: ansible.netcommon.network_cli
 ansible_network_os: arista.eos.eos
 device_type: arista
 ospf_area: 1
-site_name: Lisboa
+site_name: Lisboa 
 
 hostname: r1
 loopback: 172.16.0.1/32
