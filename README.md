@@ -1,84 +1,160 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/AiAZ2rSd)
-# AAR - Administração Automatizada de Redes
+# Network Automation & Orchestration
 
-Final project for the Network Automation course (AAR) at ISEL-DEETC.
+A multi-vendor network automation project developed as part of the Network Automation course at ISEL – Instituto Superior de Engenharia de Lisboa.
 
-## Quick Start
+The project combines network configuration automation, infrastructure validation, streaming telemetry and CI/CD practices to simplify the deployment, testing and maintenance of a virtualized network environment.
 
-### Option 1: GitHub Codespaces (recommended)
+## Overview
 
-Click the button below to launch a fully configured environment in the cloud:
+The lab simulates a multi-vendor network using Containerlab, with Arista cEOS, Nokia SR Linux and MikroTik RouterOS devices.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/isel-aar/aar-project-template?quickstart=1)
+Automation is implemented using Python, Ansible and Jinja2 templates. A digital twin environment is used to validate network changes before applying configurations to the production lab.
 
-The environment will automatically:
-- Install ContainerLab, gNMIc, Ansible and all required tools
-- Pull the router images (Arista cEOS, Nokia SR Linux, Mikrotik CHR)
-- Create a Python virtual environment with all dependencies
+The project also includes a CI/CD workflow that performs automated validation, deploys and tests the digital twin, and proceeds to production configuration when the required stages succeed.
 
-After the setup completes, activate the virtual environment and deploy the lab:
+## Key Features
 
-```bash
-source .venv/bin/activate
-sudo containerlab deploy -t topology/aar-lab.yml
-```
+- **Multi-vendor network automation** using Ansible, Python and Jinja2 templates.
+- **Infrastructure as Code (IaC)** through reusable playbooks, roles, templates and YAML configuration files.
+- **Automated validation** using `yamllint`, `ansible-lint` and Jinja2 template validation.
+- **CI/CD pipeline** implemented with GitHub Actions.
+- **Digital twin validation** to test network configurations before production deployment.
+- **Network provisioning and configuration** for OSPF, NTP and DHCP.
+- **Network troubleshooting** through automated checks and simulated failures.
+- **Streaming telemetry and monitoring** using gNMIc, Prometheus and Grafana.
 
-> **Important:** Stop your Codespace when you're not using it to conserve hours.
-> The idle timeout is set to 30 minutes, but it's good practice to stop it manually
-> via the Codespaces dashboard.
+## Architecture
 
-### Option 2: Local VM
+The virtualized lab contains four routers and four hosts connected through a multi-vendor topology.
 
-Follow the instructions in the project specification document to set up a local
-Ubuntu Server VM with ContainerLab.
+| Device | Network OS | Site |
+|---|---|---|
+| R1 | Arista cEOS | Lisboa |
+| R2 | Arista cEOS | Porto |
+| R3 | Nokia SR Linux | Faro |
+| R4 | MikroTik RouterOS | Braga |
 
-## Topology
+Containerlab provides the virtualized network environment, while Ansible and Python automate configuration and validation tasks.
 
-The lab consists of 4 routers and 4 hosts:
+A separate digital twin topology mirrors the lab environment and supports testing before production deployment.
 
-| Device | Kind | Location | OSPF Area |
-|--------|------|----------|-----------|
-| r1     | Arista cEOS | Lisboa | 1 |
-| r2     | Arista cEOS | Porto  | 2 |
-| r3     | Nokia SR Linux | Faro | 3 |
-| r4     | Mikrotik CHR | Braga | 4 |
+## CI/CD Workflow
+
+The GitHub Actions workflow is organized into three stages.
+
+### 1. Lint and Validation
+
+- Checks out the repository.
+- Validates YAML files using `yamllint`.
+- Validates Jinja2 templates.
+- Checks Ansible playbooks using `ansible-lint`.
+
+### 2. Staging — Digital Twin
+
+- Deploys the digital twin topology.
+- Waits for network devices to initialize.
+- Applies OSPF, NTP and DHCP configurations.
+- Performs host-route adjustments.
+- Executes network validation playbooks.
+- Destroys the digital twin environment after the validation stage.
+
+### 3. Production Deployment
+
+After the previous stages succeed, the workflow applies the configuration to the production lab and runs additional validation tasks.
+
+The workflow uses self-hosted GitHub Actions runners configured with the required network lab and dependencies.
+
+## Network Telemetry
+
+The project includes a telemetry stack built with:
+
+- **gNMIc** — collects streaming telemetry from supported network devices.
+- **Prometheus** — collects and stores metrics.
+- **Grafana** — provides dashboards for network monitoring.
+
+Docker Compose is used to manage the telemetry services.
+
+## Technologies Used
+
+- **Network Automation:** Ansible, Python, Jinja2
+- **Networking:** TCP/IP, OSPF, DHCP, NTP, multi-vendor routing
+- **Virtualization and Lab:** Containerlab, Docker
+- **CI/CD and Version Control:** Git, GitHub, GitHub Actions
+- **Validation:** yamllint, ansible-lint, Jinja2 validation
+- **Telemetry and Monitoring:** gNMIc, Prometheus, Grafana
+- **Network APIs and Libraries:** Netmiko, NAPALM, RESTCONF, gNMI
 
 ## Repository Structure
 
-```
-├── .devcontainer/          # Codespaces / devcontainer configuration
-├── topology/               # ContainerLab topology files (prod + twin)
-├── part1/                  # Python scripts (Netmiko, NAPALM)
-│   ├── scripts/
-│   └── templates/
-├── ansible/                # Ansible automation (Part 2)
+```text
+.
+├── .github/
+│   └── workflows/
+│       └── network-ci.yml
+├── ansible/
 │   ├── inventory/
 │   ├── playbooks/
-│   ├── roles/
-│   └── group_vars/
-├── telemetry/              # Streaming telemetry stack (Part 3)
-├── scripts/                # Shared utility scripts
-├── tests/                  # Validation scripts
-├── data/                   # devices.csv, shared variables
-├── .github/workflows/      # CI/CD pipeline (Part 4)
+│   └── roles/
+├── data/
+├── part1/
+│   ├── scripts/
+│   ├── templates/
+│   └── output/
+├── scripts/
+├── telemetry/
+│   ├── docker-compose.yml
+│   ├── gnmic.yml
+│   ├── prometheus.yml
+│   └── grafana/
+├── tests/
+├── topology/
+│   ├── aar-lab.yml
+│   └── aar-lab-twin.yml
 ├── requirements.txt
-└── .yamllint
+└── README.md
 ```
 
-## Useful Commands
+## Running the Lab
+
+The project requires a Linux environment with Docker, Containerlab, Python and the required network device images.
+
+1. Install and configure the required dependencies.
+2. Prepare the Arista cEOS, Nokia SR Linux and MikroTik RouterOS images.
+3. Create and activate a Python virtual environment.
+4. Install the Python dependencies.
+5. Deploy the production or digital twin topology using Containerlab.
+6. Run the relevant Ansible playbooks to configure and validate the network.
+
+Example:
 
 ```bash
-# Deploy the lab
 sudo containerlab deploy -t topology/aar-lab.yml
-
-# Check lab status
-sudo containerlab inspect -t topology/aar-lab.yml
-
-# Destroy the lab
-sudo containerlab destroy -t topology/aar-lab.yml
-
-# SSH to a router
-ssh admin@clab-aar-lab-r1    # Arista cEOS
-ssh admin@clab-aar-lab-r3    # Nokia SR Linux
-ssh admin@clab-aar-lab-r4    # Mikrotik CHR
 ```
+
+To deploy the digital twin:
+
+```bash
+sudo containerlab deploy -t topology/aar-lab-twin.yml
+```
+
+To remove a deployed topology:
+
+```bash
+sudo containerlab destroy -t topology/aar-lab.yml
+```
+
+**Note:** The CI/CD workflow relies on self-hosted runners with the network lab environment and dependencies configured. It will not run unchanged on a standard GitHub-hosted runner.
+
+## Authors & Contributions
+
+This project was developed collaboratively as part of the Network Automation course at ISEL.
+
+- **Leonor Oliveira** — [GitHub profile](https://github.com/leonoroliveira)
+- **Idiane Moreira** — [GitHub profile](https://github.com/IdianeMoreira)
+
+Both contributors collaborated on the project. Individual contributions should be described here according to the work performed by each author.
+
+## Academic Context
+
+Developed as part of the Network Automation course at ISEL – Instituto Superior de Engenharia de Lisboa.
+
